@@ -1,4 +1,5 @@
 <?php
 return [
-    'show_recommendations_on_product_lookup' => false
+    'show_recommendations_on_product_lookup' => false,
+    'create_impression_on_product_lookup' => false
 ];

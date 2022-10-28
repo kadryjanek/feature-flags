@@ -13,18 +13,35 @@ class Application
 
     public function __construct()
     {
-        $container = new Container([
+        $diArray = [
             Products\ProductsListController::class => function (ProductRepository $repository) {
                 return new Products\ProductsListController($repository);
             },
             Products\ProductLookupController::class => function (ProductRepository $repository) {
                 return new Products\ProductLookupController($repository);
             }
-        ]);
+        ];
+
+        if(FeatureFlag::isEnabled('create_impression_on_product_lookup')) {
+            $diArray[RecommendationsService::class] = function() {
+                $address = getenv('RECOMMENDATIONS_SERVICE_URL');
+                return new RecommendationsService($address);
+            };
+            $diArray[Products\ProductImpressionMiddleware::class] = function (RecommendationsService $service) {
+                return new Products\ProductImpressionMiddleware($service);
+            };
+        }
+
+        $container = new Container($diArray);
 
         $this->app = new App($container);
         $this->app->get('/products',  Products\ProductsListController::class);
-        $this->app->get('/products/{id}', Products\ProductLookupController::class);
+        
+        if(FeatureFlag::isEnabled('create_impression_on_product_lookup')) {
+            $this->app->get('/products/{id}', Products\ProductImpressionMiddleware::class, Products\ProductLookupController::class);
+        }else{
+            $this->app->get('/products/{id}', Products\ProductLookupController::class);
+        }
 
         $this->app->get('/', function () {
             return Response::plaintext(

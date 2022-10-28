@@ -31,4 +31,9 @@ class ProductLookupController
 
         return Response::json($data);
     }
+    
+    public function getDataProvider(): ProductLookupDataProviderInterface
+    {
+        return $this->provider;
+    }
 }

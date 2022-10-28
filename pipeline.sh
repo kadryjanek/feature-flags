@@ -9,6 +9,8 @@ then
 fi
 
 composer run tests
+FEATURE_FLAG_SHOW_RECOMMENDATIONS_ON_PRODUCT_LOOKUP=1 composer run tests
+
 ret=$?
 if [ $ret != 0 ]
 then
@@ -16,25 +18,3 @@ then
 fi
 
 cd ..
-
-docker-compose build
-ret=$?
-if [ $ret != 0 ]
-then
-    exit $ret
-fi
-
-docker-compose stop
-docker-compose create
-ret=$?
-if [ $ret != 0 ]
-then
-    exit $ret
-fi
-
-docker-compose start
-ret=$?
-if [ $ret != 0 ]
-then
-    exit $ret
-fi
